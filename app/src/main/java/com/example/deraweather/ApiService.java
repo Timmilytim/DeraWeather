@@ -19,10 +19,12 @@ public class ApiService {
     private static ApiService instance;
     private RequestQueue requestQueue;
 
+    // Private constructor to initialize the RequestQueue using Volley
     private ApiService(Context context) {
         requestQueue = Volley.newRequestQueue(context.getApplicationContext());
     }
 
+    // Singleton instance creation method
     public static synchronized ApiService getInstance(Context context) {
         if (instance == null) {
             instance = new ApiService(context);
@@ -30,24 +32,29 @@ public class ApiService {
         return instance;
     }
 
+    // Listener interface for API responses
     public interface ApiResponseListener {
         void onResponse(JSONObject response);
         void onError(String errorMessage);
     }
 
+    // Method to fetch weather data from OpenWeatherMap API
     public void getWeather(String country, String city, String appid, ApiResponseListener listener) {
         String url = String.format("https://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=%s", city, country, appid);
 
+        // Create a JsonObjectRequest for fetching weather data
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
-                listener::onResponse,
+                listener::onResponse, // Success listener
                 error -> {
                     String errorMessage = parseVolleyError(error);
                     listener.onError(errorMessage);
                 });
 
+        // Add the request to the RequestQueue for execution
         requestQueue.add(jsonObjectRequest);
     }
 
+    // Method to parse VolleyError and extract error message
     private String parseVolleyError(VolleyError error) {
         String errorMessage = "An error occurred";
         if (error.networkResponse != null && error.networkResponse.data != null) {
